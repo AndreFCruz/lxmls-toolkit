@@ -74,3 +74,7 @@ dist
 
 # Automatic python version of notebooks
 labs/scripts/*
+
+etc/
+share/
+pyvenv.cfg

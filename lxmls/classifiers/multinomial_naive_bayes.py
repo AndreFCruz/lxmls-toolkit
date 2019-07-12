@@ -21,7 +21,7 @@ class MultinomialNaiveBayes(lc.LinearClassifier):
         n_docs, n_words = x.shape
 
         # classes = a list of possible classes
-        classes = np.unique(y)
+        classes, counts = np.unique(y, return_counts=True)
         # n_classes = no. of classes
         n_classes = np.unique(y).shape[0]
 
@@ -29,20 +29,23 @@ class MultinomialNaiveBayes(lc.LinearClassifier):
         prior = np.zeros(n_classes)
         likelihood = np.zeros((n_words, n_classes))
 
-        # TODO: This is where you have to write your code!
-        # You need to compute the values of the prior and likelihood parameters
-        # and place them in the variables called "prior" and "likelihood".
-        # Examples:
-        # prior[0] is the prior probability of a document being of class 0
-        # likelihood[4, 0] is the likelihood of the fifth(*) feature being
-        # active, given that the document is of class 0
-        # (*) recall that Python starts indices at 0, so an index of 4
-        # corresponds to the fifth feature!
-
         # ----------
         # Solution to Exercise 1
 
-        raise NotImplementedError("Complete Exercise 1")
+        # class priors' estimates are the relative frequencies
+        for i, c in enumerate(classes):
+            prior[i] = counts[c] / n_docs
+
+        # maximum likelihood estimate
+        for k in range(n_classes):      # y_k
+            denominator = x[y.flatten() == k, :].sum()
+            numerator = x[y.flatten() == k, :].sum(0)
+            likelihood[:, k] = numerator / denominator
+
+            ## Poorly optimized code below
+            # for j in range(n_words):    # w_j
+            #     numerator = x[y.flatten() == k, j].sum()
+            #     likelihood[j, k] = numerator / denominator
 
         # End solution to Exercise 1
         # ----------

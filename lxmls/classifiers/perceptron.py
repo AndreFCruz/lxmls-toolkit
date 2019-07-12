@@ -16,7 +16,7 @@ class Perceptron(lc.LinearClassifier):
         self.params_per_round = []
         x_orig = x[:, :]
         x = self.add_intercept_term(x)
-        nr_x, nr_f = x.shape
+        nr_x, nr_f = x.shape        # (number of samples, number of features)
         nr_c = np.unique(y).shape[0]
         w = np.zeros((nr_f, nr_c))
 
@@ -30,12 +30,14 @@ class Perceptron(lc.LinearClassifier):
 
             for nr in range(nr_x):
                 # print "iter %i" %( epoch_nr*nr_x + nr)
-                inst = perm[nr]
+                inst = perm[nr]     # index of sample (from random permutation of dataset)
                 y_hat = self.get_label(x[inst:inst+1, :], w)
 
-                if y[inst:inst+1, 0] != y_hat:
-                    # Increase features of th e truth
-                    w[:, y[inst:inst+1, 0]] += self.learning_rate * x[inst:inst+1, :].transpose()
+                y_true = y[inst:inst+1, 0]
+                if y_true != y_hat:
+                    # Increase features of the truth
+                    w[:, y_true] += self.learning_rate * x[inst:inst+1, :].transpose()
+                    # (transpose to get the same shape of the weights' vector)
 
                     # Decrease features of the prediction
                     w[:, y_hat] += -1 * self.learning_rate * x[inst:inst+1, :].transpose()

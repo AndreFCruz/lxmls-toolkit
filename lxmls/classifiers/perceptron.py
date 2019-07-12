@@ -5,23 +5,22 @@ import lxmls.classifiers.linear_classifier as lc
 
 class Perceptron(lc.LinearClassifier):
 
-    def __init__(self, nr_epochs=10, learning_rate=1, averaged=True):
+    def __init__(self, nr_epochs=10, learning_rate=1):
         lc.LinearClassifier.__init__(self)
         self.trained = False
         self.nr_epochs = nr_epochs
         self.learning_rate = learning_rate
-        self.averaged = averaged
         self.params_per_round = []
 
-    def train(self, x, y, seed=1):
+    def train(self, x, y, seed=1, averaged=True):
         self.params_per_round = []
         x_orig = x[:, :]
         x = self.add_intercept_term(x)
         nr_x, nr_f = x.shape
         nr_c = np.unique(y).shape[0]
         w = np.zeros((nr_f, nr_c))
-        for epoch_nr in range(self.nr_epochs):
 
+        for epoch_nr in range(self.nr_epochs):
             # use seed to generate permutation
             np.random.seed(seed)
             perm = np.random.permutation(nr_x)
@@ -47,12 +46,14 @@ class Perceptron(lc.LinearClassifier):
             acc = self.evaluate(y, y_pred)
             self.trained = False
             print("Rounds: %i Accuracy: %f" % (epoch_nr, acc))
+
         self.trained = True
 
-        if self.averaged:
+        if averaged:
             new_w = 0
             for old_w in self.params_per_round:
                 new_w += old_w
             new_w /= len(self.params_per_round)
             return new_w
+        
         return w

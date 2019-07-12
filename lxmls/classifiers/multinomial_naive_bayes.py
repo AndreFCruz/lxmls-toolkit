@@ -7,12 +7,12 @@ from lxmls.distributions.gaussian import *
 
 class MultinomialNaiveBayes(lc.LinearClassifier):
 
-    def __init__(self, xtype="gaussian"):
+    def __init__(self, xtype="gaussian", smooth=False):
         lc.LinearClassifier.__init__(self)
         self.trained = False
         self.likelihood = 0
         self.prior = 0
-        self.smooth = False
+        self.smooth = smooth
         self.smooth_param = 1
 
     def train(self, x, y):
@@ -40,12 +40,11 @@ class MultinomialNaiveBayes(lc.LinearClassifier):
         for k in range(n_classes):      # y_k
             denominator = x[y.flatten() == k, :].sum()
             numerator = x[y.flatten() == k, :].sum(0)
-            likelihood[:, k] = numerator / denominator
 
-            ## Poorly optimized code below
-            # for j in range(n_words):    # w_j
-            #     numerator = x[y.flatten() == k, j].sum()
-            #     likelihood[j, k] = numerator / denominator
+            if self.smooth:
+                likelihood[:, k] = (self.smooth_param + numerator) / (self.smooth_param * n_words + denominator)
+            else:
+                likelihood[:, k] = numerator / denominator
 
         # End solution to Exercise 1
         # ----------

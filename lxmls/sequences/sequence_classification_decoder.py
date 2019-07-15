@@ -82,10 +82,7 @@ class SequenceClassificationDecoder:
     # Emission scoress: (length, num_states) array
     # ----------
     def run_viterbi(self, initial_scores, transition_scores, final_scores, emission_scores):
-
-        # ----------
-        # Solution to Exercise 2.8
-
+        
         length = np.size(emission_scores, 0)  # Length of the sequence.
         num_states = np.size(initial_scores)  # Number of states.
 
@@ -101,7 +98,26 @@ class SequenceClassificationDecoder:
         # ----------
         # Solution to Exercise 8
 
-        raise NotImplementedError("Complete Exercise 8")
+        # Initialize initial probabilities (from start state)
+        viterbi_scores[0, :] = initial_scores + emission_scores[0, :]   ## multiplication in log domain -> sum
+
+        for i in range(1, length):      # for each time-step
+            for k in range(num_states):     # for each state
+                # NOTE multiplication in log domain turns a sum and sum turns a logsum
+                scores_over_possible_states = transition_scores[i-1, k, :] + viterbi_scores[i-1, :]
+                viterbi_scores[i, k] = np.max(scores_over_possible_states) + emission_scores[i, k]
+                viterbi_paths[i, k] = np.argmax(scores_over_possible_states)
+
+        log_likelihood = np.max(final_scores + viterbi_scores[-1, :])
+
+        # Backward pass to retrieve best path:
+        print(viterbi_paths)
+        path = -np.ones((length,), dtype=int)
+        path[-1] = np.argmax(final_scores + viterbi_scores[-1, :])
+        for i in range(length - 2, -1, -1):
+            path[i] = viterbi_paths[i+1, path[i+1]]
+        
+        return path, log_likelihood
 
         #### Little guide of the implementation ####################################
         # Initializatize the viterbi scores

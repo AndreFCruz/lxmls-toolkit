@@ -44,7 +44,62 @@ class StructuredPerceptron(dsc.DiscriminativeSequenceClassifier):
         # ----------
         # Solution to Exercise 3
 
-        raise NotImplementedError("Complete Exercise 3")
+        num_mistakes = 0
+        length = len(sequence.x)
+        pred_seq, _ = self.viterbi_decode(sequence)
+
+        y_true = sequence.y
+        y_pred = pred_seq.y
+
+        # Update weights if y_true != y_pred
+        y_t_true = y_true[0]
+        y_t_pred = y_pred[0]
+
+        # Update initial_features
+        if y_t_true != y_t_pred:
+            num_mistakes += 1
+            true_f_init = self.feature_mapper.get_initial_features(sequence, y_t_true)
+            pred_f_init = self.feature_mapper.get_initial_features(sequence, y_t_pred)
+
+            self.parameters[true_f_init] += self.learning_rate
+            self.parameters[pred_f_init] -= self.learning_rate
+
+        for i in range(length):
+            y_t_true = y_true[i]
+            y_t_pred = y_pred[i]
+
+            # Update emission_features
+            if y_t_true != y_t_pred:
+                num_mistakes += 1
+                true_f_emiss = self.feature_mapper.get_emission_features(sequence, i, y_t_true)
+                pred_f_emiss = self.feature_mapper.get_emission_features(sequence, i, y_t_pred)
+                self.parameters[true_f_emiss] += self.learning_rate
+                self.parameters[pred_f_emiss] -= self.learning_rate
+
+            # Update transition features
+            if i > 0:   # for each bi-gram, update bigram features if prediction is wrong
+                prev_y_t_true = y_true[i-1]
+                prev_y_t_pred = y_pred[i-1]
+
+                true_f_trans = self.feature_mapper.get_transition_features(sequence, i, y_t_true, prev_y_t_true)
+                pred_f_trans = self.feature_mapper.get_transition_features(sequence, i, y_t_pred, prev_y_t_pred)
+
+                self.parameters[true_f_trans] += self.learning_rate
+                self.parameters[pred_f_trans] -= self.learning_rate
+
+        # Update final_features
+        y_final_true = y_true[-1]
+        y_final_pred = y_pred[-1]
+        if y_final_true != y_final_pred:
+            num_mistakes += 1
+            true_f_final = self.feature_mapper.get_final_features(sequence, y_final_true)
+            pred_f_final = self.feature_mapper.get_final_features(sequence, y_final_pred)
+
+            self.parameters[true_f_final] += self.learning_rate
+            self.parameters[pred_f_final] -= self.learning_rate
+
+        # return num_mistakes
+        return length, num_mistakes
 
         # End of Solution to Exercise 3
         # ----------

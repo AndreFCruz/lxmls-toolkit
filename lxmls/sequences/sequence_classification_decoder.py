@@ -108,7 +108,6 @@ class SequenceClassificationDecoder:
         log_likelihood = np.max(final_scores + viterbi_scores[-1, :])
 
         # Backward pass to retrieve most likely sequence (best path):
-        print(viterbi_paths)
         path = -np.ones((length,), dtype=int)
         path[-1] = np.argmax(final_scores + viterbi_scores[-1, :])
         for i in range(length - 2, -1, -1):

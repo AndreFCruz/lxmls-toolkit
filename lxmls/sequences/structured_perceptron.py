@@ -40,6 +40,17 @@ class StructuredPerceptron(dsc.DiscriminativeSequenceClassifier):
             self.parameters = new_w
 
     def perceptron_update(self, sequence):
+        """
+        General perceptron update rule:
+            w_t+1 <- w_t + learning_rate * ( f(seq, y_true) - f(seq, y_pred) )
+
+        Instead of updating the whole feature vector, update each feature individually,
+        as needed (when prediction is wrong).
+        1. At each time-step, check appropriate features (f_init for t=1, f_final for t=N,
+            f_emission for t=1...N, f_transition for bi-grams from t=2...N);
+        2. If prediction at a given time-step is wrong, subtract to weights/parameters of
+            predicted features and sum to weights/parameters of true features;
+        """
 
         # ----------
         # Solution to Exercise 3

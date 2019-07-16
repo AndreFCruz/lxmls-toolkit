@@ -143,11 +143,24 @@ class HMM(sc.SequenceClassifier):
         # ----------
         # Solution to Exercise 10
 
-        raise NotImplementedError("Complete Exercise 10")
+        # Initial counts
+        self.initial_counts += state_posteriors[0, :]
+
+        for i in range(len(sequence)):
+            x_i = sequence.x[i]
+
+            # Emission counts
+            self.emission_counts[x_i] += state_posteriors[i, :]
+
+            # Transition counts
+            if i > 0:
+                self.transition_counts += transition_posteriors[i-1, :, :]
+
+        # Final counts
+        self.final_counts += state_posteriors[-1]
 
         # End of solution to Exercise 10
         # ----------
-
 
     def compute_parameters(self):
         """ Estimate the HMM parameters by normalizing the counts."""

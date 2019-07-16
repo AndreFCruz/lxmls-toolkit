@@ -92,9 +92,6 @@ class SequenceClassificationDecoder:
         # Variables storing the paths to backtrack.
         viterbi_paths = -np.ones([length, num_states], dtype=int)
 
-        # Most likely sequence.
-        best_path = -np.ones(length, dtype=int)
-
         # ----------
         # Solution to Exercise 8
 
@@ -110,7 +107,7 @@ class SequenceClassificationDecoder:
 
         log_likelihood = np.max(final_scores + viterbi_scores[-1, :])
 
-        # Backward pass to retrieve best path:
+        # Backward pass to retrieve most likely sequence (best path):
         print(viterbi_paths)
         path = -np.ones((length,), dtype=int)
         path[-1] = np.argmax(final_scores + viterbi_scores[-1, :])

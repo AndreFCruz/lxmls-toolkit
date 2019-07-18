@@ -82,21 +82,67 @@ class NumpyMLP(MLP):
         """Gradients for sigmoid hidden layers and output softmax"""
 
         # Run forward and store activations for each layer
-        log_prob_y, layer_inputs = self.log_forward(input)
-        prob_y = np.exp(log_prob_y)
+        log_prob_y, layer_inputs = self.log_forward(input)  ## predicted outputs
+        prob_y = np.exp(log_prob_y)             ## move scores out of log domain
 
         num_examples, num_clases = prob_y.shape
         num_hidden_layers = len(self.parameters) - 1
 
         # For each layer in reverse store the backpropagated error, then compute
         # the gradients from the errors and the layer inputs
-        errors = []
+        errors = list()
 
         # ----------
         # Solution to Exercise 2
 
-        raise NotImplementedError("Implement Exercise 2")
-        
+        ## compute error at last layer
+        true_y = index2onehot(output, num_clases)
+        err = true_y - prob_y
+        # err = (prob_y - true_y) / num_examples
+
+        ## ^ specific for Cross-Entropy loss
+        ## (which gives a particularly friendly derivative)
+
+        errors.append(err)
+
+        ## backpropagate error through remaining layers
+        for i in reversed(range(num_hidden_layers)):
+
+            ## backpropagate through linear layer
+            err = np.dot(err, self.parameters[i+1][0])
+
+            ## backpropagate through the non-linearity (i.e. sigmoid layer)
+            err *= layer_inputs[i+1] * (1 - layer_inputs[i+1])
+
+            errors.append(err)
+
+        ## reverse errors
+        errors = errors[::-1]
+
+        ## compute gradients from errors
+        gradients = list()
+        for i in range(num_hidden_layers + 1):
+            w_i = self.parameters[i][0]
+            w_grad = np.zeros(w_i.shape)
+
+            ## weight gradient
+            for l in range(num_examples):
+                w_grad += np.outer(
+                    errors[i][l, :],
+                    layer_inputs[i][l, :]
+                )
+
+            ## bias gradient
+            b_grad = np.sum(errors[i], axis=0, keepdims=True)
+
+            ## line 19 of Algorithm 8 (SGD)
+            ## (this could've be done at the beginning -- on the first error calculation,
+            ##  as it propagates through following dot products)
+            w_grad *= -1 / num_examples
+            b_grad *= -1 / num_examples
+
+            gradients.append([w_grad, b_grad])
+
         # End of solution to Exercise 2
         # ----------
 

@@ -46,6 +46,8 @@ class StructuredPerceptron(dsc.DiscriminativeSequenceClassifier):
 
         Instead of updating the whole feature vector, update each feature individually,
         as needed (when prediction is wrong).
+            -> this is done for better efficiency, as updates are very sparse.
+
         1. At each time-step, check appropriate features (f_init for t=1, f_final for t=N,
             f_emission for t=1...N, f_transition for bi-grams from t=2...N);
         2. If prediction at a given time-step is wrong, subtract to weights/parameters of

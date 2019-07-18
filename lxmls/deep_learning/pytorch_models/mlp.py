@@ -31,7 +31,6 @@ class PytorchMLP(MLP):
         # Initialize some functions that we will need
         self.logsoftmax = torch.nn.LogSoftmax(dim=1)
 
-    # TODO: Move these outside fo the class as in the numpy case
     def _log_forward(self, input):
         """
         Forward pass
@@ -45,9 +44,11 @@ class PytorchMLP(MLP):
 
         # ----------
         # Solution to Exercise 4
+        for i in range(self.num_layers):
+            w_i, b_i = self.parameters[i]
+            tilde_z = torch.matmul(tilde_z, torch.t(w_i)) + b_i
 
-        raise NotImplementedError("Implement Exercise 4")
-
+        log_tilde_z = self.logsoftmax(tilde_z)
         # End of solution to Exercise 4
         # ----------
 

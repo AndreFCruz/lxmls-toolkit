@@ -29,7 +29,14 @@ class Critic(nn.Module):
         self.linear3 = nn.Linear(12, 1)
 
     def forward(self, state, action):
-        raise Exception("TODO: Implement the forward pass")
+        x = torch.tensor([state], dtype=torch.float32)
+        x_state = F.sigmoid(self.linear(x))
+
+        # import ipdb; ipdb.set_trace()
+        x_action = F.sigmoid(self.linear2(action.unsqueeze(0)))
+        x = torch.cat([x_state, x_action], dim=1)
+        x = self.linear3(x)
+        return x
 
 
 def train():
@@ -69,13 +76,18 @@ def train():
                     savelist.append(cumulative)
                 savelist = savelist[::-1]
                 resultlist.append(savelist[0])
-                if episode % 50 == 0:
+                if episode % ((EPISODES // 10) - 1) == 0:
                     plt.plot(resultlist)
                     plt.show()
                 savelist = np.array(savelist)
 
                 for (observation, action, reward, next_observation), cum_reward in zip(observations, savelist):
-                    crit_score = critic(observation, action)
+
+                    onehot_action = torch.zeros(2)
+                    onehot_action[action] = 1
+
+                    crit_score = critic(observation, onehot_action)
+
                     loss = critic_loss(
                         crit_score,
                         torch.autograd.Variable(
@@ -87,7 +99,7 @@ def train():
                     optimizer_critic.step()
                     optimizer_critic.zero_grad()
                     crit_score = float(
-                        critic(observation, action).data.numpy()[0][0]
+                        critic(observation, onehot_action).data.numpy()[0][0]
                     )
                     action = torch.autograd.Variable(
                         torch.LongTensor([action])

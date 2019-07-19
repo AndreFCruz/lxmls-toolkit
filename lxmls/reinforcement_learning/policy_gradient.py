@@ -21,7 +21,10 @@ class PolicyGradient(nn.Module):
         # ----------
         # Solution to Exercise 6.4
 
-        raise Exception("Complete exercise 6.4")
+        x = torch.tensor([state], dtype=torch.float32)
+        x = F.sigmoid(self.linear(x))
+        x = F.log_softmax(self.linear2(x))
+        return x
 
         # End of solution to Exercise 6.4
         # ----------
@@ -72,7 +75,7 @@ def train():
                 savelist = savelist[::-1]
 
                 resultlist.append(savelist[0])
-                if episode % 50 == 0:
+                if episode % ((EPISODES // 10) - 1) == 0:
                     plt.plot(resultlist)
                     plt.show()
                 savelist = np.array(savelist)

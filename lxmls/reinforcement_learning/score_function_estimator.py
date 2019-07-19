@@ -36,7 +36,7 @@ def train():
     rewards = np.array([10., 2., 3.])/10
     model = Model()
     optim = torch.optim.SGD([model.t_policy], lr=0.01)
-    for i in range(10001):
+    for i in range(6001):
         poli = torch.nn.functional.softmax(model.t_policy).data.numpy()
         state_action_list = []
         start_state = random.randint(0, 2)
@@ -55,10 +55,16 @@ def train():
 
             # ----------
             # Solution to Exercise 6.3
-
-            raise NotImplementedError("Exercise 6.3")
+            value = model()
+            value = -value[state, action] * rew     # minus because we're minimizing
+            grad_list.append(value.view(1, -1))
 
         # code needed at this identation level!
+
+        grads = torch.cat(grad_list, dim=0).mean()
+        grads.backward()
+        optim.step()
+        optim.zero_grad()
 
         # End of solution to Exercise 6.3
         # ----------
@@ -66,7 +72,7 @@ def train():
         value = (gt(rewardlist, 1))
         valuelist.append(value)
 
-        if i % 100 == 0:
+        if i % 500 == 0:
             print(poli)
             print(rewardlist)
             plt.plot(valuelist)
